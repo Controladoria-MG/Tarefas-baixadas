@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarefas Baixadas</title>
+  <link rel="stylesheet" href="static/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <header class="header">
+    <img src="data/imagens/logo.png" alt="MG Contabilidade" class="header-logo" />
+    <h1 class="header-titulo">Tarefas Baixadas</h1>
+  </header>
+
+  <main class="content">
+
+    <div id="loading" class="loading">Carregando dados...</div>
+
+    <div id="dashboard" style="display:none;">
+
+      <!-- Filtros -->
+      <section class="filtros-section">
+        <div class="filtro-grupo">
+          <label class="filtro-label" for="sel-depto">Departamento</label>
+          <select id="sel-depto" class="filtro-select"></select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label" for="sel-semana">Semana</label>
+          <select id="sel-semana" class="filtro-select"></select>
+        </div>
+      </section>
+
+      <!-- Cards -->
+      <section class="cards-section">
+        <div class="card card-total">
+          <span class="card-label">Total de Tarefas</span>
+          <span class="card-value" id="card-total">0</span>
+        </div>
+        <div class="card card-prazo">
+          <span class="card-label">Baixadas no Prazo</span>
+          <span class="card-value" id="card-prazo">0</span>
+          <span class="card-pct" id="pct-prazo"></span>
+        </div>
+        <div class="card card-atraso">
+          <span class="card-label">Baixadas em Atraso</span>
+          <span class="card-value" id="card-atraso">0</span>
+          <span class="card-pct" id="pct-atraso"></span>
+        </div>
+      </section>
+
+      <!-- Gráficos -->
+      <section class="graficos-section">
+        <div class="grafico-box">
+          <h2 class="grafico-titulo">Classificação das Tarefas</h2>
+          <div class="grafico-canvas-wrap">
+            <canvas id="grafico-barras"></canvas>
+          </div>
+        </div>
+        <div class="grafico-box">
+          <h2 class="grafico-titulo">Prazo vs Atraso</h2>
+          <div class="grafico-canvas-wrap">
+            <canvas id="grafico-rosca"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ranking -->
+      <section class="ranking-box">
+        <div class="ranking-header">
+          <h2 class="grafico-titulo" style="border:none;margin:0;padding:0;">Ranking</h2>
+          <div class="toggle-grupo">
+            <button id="btn-tarefas" class="toggle-btn active" onclick="alternarRanking('tarefas')">Tarefas</button>
+            <button id="btn-colaboradores" class="toggle-btn" onclick="alternarRanking('colaboradores')">Colaboradores</button>
+          </div>
+        </div>
+        <div id="ranking-lista" class="ranking-lista"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="static/app.js"></script>
+</body>
+</html>
