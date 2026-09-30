@@ -406,7 +406,8 @@ async function carregarDataAtualizacao() {
   const hoje = new Date();
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-  const partes = [texto, `Tarefas baixadas de ${fmtDiaMes(inicioMes)} até ${fmtDiaMes(fimMes)}`]
+  const partes = [texto, `Tarefas baixadas de ${fmtDiaMes(inicioMes)} até ${fmtDiaMes(fimMes)}`,
+    `Para atualizar seus dados recarregue a página usando "Ctrl+F5"`]
     .filter(Boolean);
   document.getElementById('header-atualizacao').innerHTML =
     partes.join('<span class="mg-topbar-sep">|</span>');
