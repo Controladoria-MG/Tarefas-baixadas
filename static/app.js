@@ -364,6 +364,9 @@ function lerPlanilha(planilha) {
 async function carregarUmaBase(arquivo) {
   const resp = await fetch(arquivo);
   if (!resp.ok) throw new Error(`${arquivo} não encontrado (${resp.status})`);
+  const cab = resp.headers.get('Last-Modified');
+  const lastMod = cab ? new Date(cab) : null;
+  if (lastMod && !isNaN(lastMod) && (!ultimaModificacao || lastMod > ultimaModificacao)) ultimaModificacao = lastMod;
 
   const buffer   = await resp.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
@@ -373,17 +376,40 @@ async function carregarUmaBase(arquivo) {
   return lerPlanilha(planilha);
 }
 
-// Lê data/base_info.json (gravado pelo pipeline toda vez que as bases são
-// regeradas) para mostrar quando os dados foram atualizados de fato.
+// Cabeçalho igual ao do Controle de Tarefas: "Base atualizada em
+// dd/mm/aaaa hh:mm | Tarefas baixadas de dd/mm a dd/mm". A data vem do
+// Last-Modified do .xlsx mais recente (o botão "Atualizar base" do servidor
+// só troca os .xlsx, então o base_info.json fica velho); o base_info.json
+// só entra se o servidor não mandar esse cabeçalho. O período é o mês atual
+// inteiro (01 até o último dia), igual ao "vencimento até" do Controle de
+// Tarefas.
+let ultimaModificacao = null;
+
+function fmtDiaMes(d) {
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 async function carregarDataAtualizacao() {
-  try {
-    const resp = await fetch('data/base_info.json');
-    if (!resp.ok) throw new Error('base_info.json não encontrado');
-    const info = await resp.json();
-    document.getElementById('header-atualizacao').textContent = `Base atualizada em ${info.atualizado_em}`;
-  } catch (e) {
-    document.getElementById('header-atualizacao').textContent = '';
+  let texto = '';
+  if (ultimaModificacao) {
+    const hora = ultimaModificacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    texto = `Base atualizada em ${ultimaModificacao.toLocaleDateString('pt-BR')} ${hora}`;
+  } else {
+    try {
+      const resp = await fetch('data/base_info.json');
+      if (!resp.ok) throw new Error('base_info.json não encontrado');
+      const info = await resp.json();
+      texto = `Base atualizada em ${info.atualizado_em}`;
+    } catch (e) { /* sem data */ }
   }
+
+  const hoje = new Date();
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+  const partes = [texto, `Tarefas baixadas de ${fmtDiaMes(inicioMes)} até ${fmtDiaMes(fimMes)}`]
+    .filter(Boolean);
+  document.getElementById('header-atualizacao').innerHTML =
+    partes.join('<span class="mg-topbar-sep">|</span>');
 }
 
 async function carregarDados() {
@@ -406,6 +432,7 @@ async function carregarDados() {
     document.getElementById('loading').style.display   = 'none';
     document.getElementById('dashboard').style.display = 'block';
 
+    carregarDataAtualizacao();
     renderizarFiltros();
     atualizarTudo();
 
@@ -418,5 +445,4 @@ async function carregarDados() {
   }
 }
 
-carregarDataAtualizacao();
 carregarDados();
